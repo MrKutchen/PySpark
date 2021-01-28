@@ -8,4 +8,4 @@ class Persist:
 
     def persist_data(self,df):
         print("Persisiting")
-        df.coalesce(1).write.option("header", "true").csv("transformed_retailstore")
+        df.coalesce(1).write.mode('overwrite').option("header", "true").csv("transformed_retailstore")
