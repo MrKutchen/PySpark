@@ -1,14 +1,12 @@
+import configparser
 import logging
 import logging.config
-import sys
 
 import psycopg2
-import pyspark
-from pyspark.sql import SparkSession
 
 
 class Persist:
-    logging.config.fileConfig("resources/configs/logging.conf")
+    logging.config.fileConfig("pipeline/resources/configs/logging.conf")
 
     def __init__(self, spark):
         self.spark = spark
@@ -17,16 +15,22 @@ class Persist:
         try:
             logger = logging.getLogger("Persist")
             logger.info('Persisting')
+            config = configparser.ConfigParser()
+            config.read('pipeline/resources/pipeline.ini')
+            target_table = config.get('DB_CONFIGS', 'TARGET_PG_TABLE')
+            logger.info('PG Target table is ' + str(target_table))
+
             # df.coalesce(1).write.option("header", "true").csv("transformed_retailstore")
 
             df.write \
-            .mode("append") \
-            .format("jdbc") \
-            .option("url", "jdbc:postgresql://localhost:5432/postgres") \
-            .option("dbtable", "futurexschema.futurex_course") \
-            .option("user", "postgres") \
-            .option("password", "Jekyll") \
-            .save()
+                .mode("append") \
+                .format("jdbc") \
+                .option("url", "jdbc:postgresql://localhost:5432/postgres") \
+                .option("dbtable", target_table) \
+                .option("user", "postgres") \
+                .option("password", "Jekyll") \
+                .save()
+
         except Exception as exp:
             logger.error("An error occured while persisiting data >" + str(exp))
             # store in database table
@@ -34,7 +38,7 @@ class Persist:
             raise Exception("HDFS directory already exists")
 
     def insert_into_pg(self):
-        connection = psycopg2.connect(user='postgres', password='Jekyll', host='localhost', database='postgres')
+        connection = psycopg2.connect(user='postgres', password='admin', host='localhost', database='postgres')
         cursor = connection.cursor()
         insert_query = "INSERT INTO futurexschema.futurex_course_catalog (course_id, course_name, author_name, course_section, creation_date) VALUES (%s, %s, %s, %s,%s)"
         insert_tuple = (3, 'Machine Learning', 'FutureX', '{}', '2020-10-20')

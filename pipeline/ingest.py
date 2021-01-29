@@ -1,16 +1,12 @@
 import logging
 import logging.config
 
-import pandas
 import pandas.io.sql as sqlio
 import psycopg2
-import pyspark
-from pyspark.sql import SparkSession
-from pyspark.sql.types import IntegerType
 
 
 class Ingest:
-    logging.config.fileConfig("resources/configs/logging.conf")
+    logging.config.fileConfig("pipeline/resources/configs/logging.conf")
 
     def __init__(self, spark):
         self.spark = spark
@@ -25,7 +21,7 @@ class Ingest:
         return course_df
 
     def read_from_pg(self):
-        connection = psycopg2.connect(user='postgres', password='Jekyll', host='localhost', database='postgres')
+        connection = psycopg2.connect(user='postgres', password='admin', host='localhost', database='postgres')
         cursor = connection.cursor()
         sql_query = "select * from futurexschema.futurex_course_catalog"
         pdDF = sqlio.read_sql_query(sql_query, connection)
@@ -33,7 +29,6 @@ class Ingest:
         sparkDf.show()
 
     def read_from_pg_using_jdbc_driver(self):
-
         jdbcDF = self.spark.read \
             .format("jdbc") \
             .option("url", "jdbc:postgresql://localhost:5432/postgres") \
