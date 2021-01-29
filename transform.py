@@ -14,5 +14,7 @@ class Transform:
         logger.warning("Warning in Transformer")
 
         # drop all the rows having null values
-        df1 = df.na.drop()
-        return df1
+        # df1 = df.na.drop()
+        df1 = df.na.fill("Unknown", ["author_name"])
+        df2 = df1.na.fill("0", ["no_of_reviews"])
+        return df2
