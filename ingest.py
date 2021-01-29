@@ -31,3 +31,15 @@ class Ingest:
         pdDF = sqlio.read_sql_query(sql_query, connection)
         sparkDf = self.spark.createDataFrame(pdDF)
         sparkDf.show()
+
+    def read_from_pg_using_jdbc_driver(self):
+
+        jdbcDF = self.spark.read \
+            .format("jdbc") \
+            .option("url", "jdbc:postgresql://localhost:5432/postgres") \
+            .option("dbtable", "futurexschema.futurex_course_catalog") \
+            .option("user", "postgres") \
+            .option("password", "Jekyll") \
+            .load()
+
+        jdbcDF.show()

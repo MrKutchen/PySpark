@@ -19,6 +19,14 @@ class Persist:
             logger.info('Persisting')
             # df.coalesce(1).write.option("header", "true").csv("transformed_retailstore")
 
+            df.write \
+            .mode("append") \
+            .format("jdbc") \
+            .option("url", "jdbc:postgresql://localhost:5432/postgres") \
+            .option("dbtable", "futurexschema.futurex_course") \
+            .option("user", "postgres") \
+            .option("password", "Jekyll") \
+            .save()
         except Exception as exp:
             logger.error("An error occured while persisiting data >" + str(exp))
             # store in database table
