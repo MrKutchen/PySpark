@@ -2,7 +2,9 @@ import logging
 import logging.config
 import sys
 
+import pyspark
 from pyspark.sql import SparkSession
+from pyspark.sql.types import IntegerType
 
 import ingest
 import persist
@@ -16,12 +18,14 @@ class Pipeline:
         try:
             logging.info('run_pipeline method started')
             ingest_process = ingest.Ingest(self.spark)
+            ingest_process.read_from_pg()
             df = ingest_process.ingest_data()
             df.show()
             transform_process = transform.Transform(self.spark)
             transformed_df = transform_process.transform_data(df)
             transformed_df.show()
             persist_process = persist.Persist(self.spark)
+            persist_process.insert_into_pg()
             persist_process.persist_data(transformed_df)
             logging.info('run_pipeline method ended')
         except Exception as exp:
@@ -37,26 +41,24 @@ class Pipeline:
             .appName("my first spark app") \
             .enableHiveSupport().getOrCreate()
 
-    # def create_hive_table(self):
-    #     self.spark.sql("create database if not exists udemycoursebb")
-    #     self.spark.sql("create table if not exists udemycoursebb.ud_course_table(course_id string, course_name string, author_name string, no_of_reviews string)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (1, 'JAVA', 'Udemy', null)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (2, 'JAVA', null, 56)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (3, 'Big Data', 'Udemy', 123)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (4, 'Linux', 'Udemy', 93)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (5, 'Microservices', 'Udemy', 120)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (6, 'CMS', 'Udemy', 23)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (7, 'Dot Net', 'Udemy', 93)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (8, 'Python', null, null)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (9, 'CMS', 'Udemy', 58)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (10, 'Ansible', 'Udemy', null)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (11, 'Jenkins', 'Udemy', 45)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (12, 'Go Lang', null, 57)")
-    #     self.spark.sql("insert into udemycoursebb.ud_course_table VALUES (13, 'Swift', 'Udemy', 86)")
-    #     #Treat empty strings as null values
-    #     self.spark.sql("alter table udemycoursebb.ud_course_table set tblproperties('serialization.null.format'='')")
-
-
+    def create_hive_table(self):
+        # self.spark.sql("create database if not exists fxxcoursedb")
+        # self.spark.sql("create table if not exists fxxcoursedb.fx_course_table (course_id string,course_name string,author_name string,no_of_reviews string)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (1,'Java','FutureX',45)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (2,'Java','FutureXSkill',56)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (3,'Big Data','Future',100)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (4,'Linux','Future',100)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (5,'Microservices','Future',100)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (6,'CMS','',100)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (7,'Python','FutureX','')")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (8,'CMS','Future',56)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (9,'Dot Net','FutureXSkill',34)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (10,'Ansible','FutureX',123)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (11,'Jenkins','Future',32)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (12,'Chef','FutureX',121)")
+        self.spark.sql("insert into fxxcoursedb.fx_course_table VALUES (13,'Go Lang','',105)")
+        # Treat empty strings as null
+        self.spark.sql("alter table fxxcoursedb.fx_course_table set tblproperties('serialization.null.format'='')")
 
 
 if __name__ == '__main__':
