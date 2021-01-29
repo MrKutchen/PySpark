@@ -1,5 +1,6 @@
 import logging
 import logging.config
+import sys
 
 
 class Persist:
@@ -9,6 +10,12 @@ class Persist:
         self.spark = spark
 
     def persist_data(self, df):
-        logging.info('Persisting')
-        logging.error("dummy error in Persisting")
-        df.coalesce(1).write.mode('overwrite').option("header", "true").csv("transformed_retailstore.csv")
+        try:
+            logger = logging.getLogger("Persist")
+            logger.info('Persisting')
+            df.coalesce(1).write.option("header", "true").csv("transformed_retailstore.csv")
+        except Exception as exp:
+            logger.error("An error occured while persisting data >" + str(exp))
+            # store in database table
+            # send an email notification
+            raise Exception("HDFS directory already exists")

@@ -9,7 +9,9 @@ class Ingest:
         self.spark = spark
 
     def ingest_data(self):
-        logging.info('Ingesting from csv')
+        logger = logging.getLogger("Ingest")
+        logger.info('Ingesting from csv')
         customer_df = self.spark.read.csv("retailstore.csv", header=True)
-        logging.info('DataFrame created')
+        logger.info('DataFrame created')
+        logger.warning("DataFrame created with warning")
         return customer_df

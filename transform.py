@@ -9,8 +9,9 @@ class Transform:
         self.spark = spark
 
     def transform_data(self, df):
-        logging.info("Transforming")
-        logging.warning("Warning in Transformer")
+        logger = logging.getLogger("Transform")
+        logger.info("Transforming")
+        logger.warning("Warning in Transformer")
 
         # drop all the rows having null values
         df1 = df.na.drop()
